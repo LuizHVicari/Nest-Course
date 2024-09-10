@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { MessageEntity } from './entities/message.entity'
+import { UpdateMessageDto } from './dto/update-message.dto'
+import { CreateMessageDto } from './dto/create-message.dto'
 
 @Injectable()
 export class MessagesService {
@@ -22,25 +24,27 @@ export class MessagesService {
         return this.messages.find(item => item.id === +id )
     }
 
-    createMessage(body: MessageEntity): boolean {
+    createMessage(body: CreateMessageDto): boolean {
         this.lastId += 1
         const id = this.lastId
         const message = {
             id,
-            ...body
+            ...body,
+            read: false,
+            date: new Date()
         }
         this.messages.push(message)
         console.log(message)
         return true
     }
 
-    updateMessage(id: string, body: any): MessageEntity {
+    updateMessage(id: string, body: UpdateMessageDto): MessageEntity {
         const messageIdx = this.messages.findIndex(m => m.id === +id)
         
         if (messageIdx >= 0) {
             const message = this.messages[messageIdx]
             const newMessage = {
-                id: message.id,
+                ...message,
                 ...body
             }
             this.messages[messageIdx] = newMessage

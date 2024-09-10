@@ -14,6 +14,8 @@ import {
 } from '@nestjs/common'
 import { MessagesService } from './messages.service'
 import { MessageEntity } from './entities/message.entity';
+import { CreateMessageDto } from './dto/create-message.dto';
+import { UpdateMessageDto } from './dto/update-message.dto';
 
 @Controller('messages')
 export class MessagesController {
@@ -30,7 +32,7 @@ export class MessagesController {
     }
 
     @Post()
-    createMessage(@Body() message: any) {
+    createMessage(@Body() message: CreateMessageDto) {
         const created = this.messagesService.createMessage(message)
         if (!created) throw new BadRequestException()
     }
@@ -47,7 +49,7 @@ export class MessagesController {
 
     @Patch(':id')
     partialUpdateMessage(
-        @Body() body: any,
+        @Body() body: UpdateMessageDto,
         @Param('id') id: string,
     ): MessageEntity {
         const message = this.messagesService.updateMessage(id, body)
