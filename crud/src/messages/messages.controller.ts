@@ -8,14 +8,15 @@ import {
     HttpStatus,
     NotFoundException,
     Param,
+    ParseIntPipe,
     Patch,
     Post,
     Query,
 } from '@nestjs/common'
 import { MessagesService } from './messages.service'
-import { MessageEntity } from './entities/message.entity';
-import { CreateMessageDto } from './dto/create-message.dto';
-import { UpdateMessageDto } from './dto/update-message.dto';
+import { MessageEntity } from './entities/message.entity'
+import { CreateMessageDto } from './dto/create-message.dto'
+import { UpdateMessageDto } from './dto/update-message.dto'
 
 @Controller('messages')
 export class MessagesController {
@@ -39,7 +40,7 @@ export class MessagesController {
 
     @HttpCode(HttpStatus.OK)
     @Get(':id')
-    retrieveMessage(@Param('id') id: string): MessageEntity {
+    retrieveMessage(@Param('id') id: number): MessageEntity {
         const message = this.messagesService.retrieveMessage(id)
         if (message !== undefined) {
             return message
@@ -50,7 +51,7 @@ export class MessagesController {
     @Patch(':id')
     partialUpdateMessage(
         @Body() body: UpdateMessageDto,
-        @Param('id') id: string,
+        @Param('id', ParseIntPipe) id: number,
     ): MessageEntity {
         const message = this.messagesService.updateMessage(id, body)
         if (message === undefined) {
@@ -61,10 +62,10 @@ export class MessagesController {
 
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
-    destroyMessage(@Param('id') id: string) {
+    destroyMessage(@Param('id', ParseIntPipe) id: number) {
         const deleted = this.messagesService.destroyMessage(id)
         if (!deleted) {
             throw new NotFoundException()
-        } 
+        }
     }
 }

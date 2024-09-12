@@ -6,22 +6,24 @@ import { CreateMessageDto } from './dto/create-message.dto'
 @Injectable()
 export class MessagesService {
     private lastId = 1
-    private messages: MessageEntity[] = [{
-        id: 1,
-        text: 'first message',
-        from: 'Joana',
-        to: 'João',
-        read: false,
-        date: new Date()
-    }]
+    private messages: MessageEntity[] = [
+        {
+            id: 1,
+            text: 'first message',
+            from: 'Joana',
+            to: 'João',
+            read: false,
+            date: new Date(),
+        },
+    ]
 
     findAllMessages(): MessageEntity[] {
         return this.messages
     }
 
-
-    retrieveMessage(id: string): MessageEntity {
-        return this.messages.find(item => item.id === +id )
+    retrieveMessage(id: number): MessageEntity {
+        console.log(id, typeof id)
+        return this.messages.find(item => item.id === id)
     }
 
     createMessage(body: CreateMessageDto): boolean {
@@ -31,28 +33,28 @@ export class MessagesService {
             id,
             ...body,
             read: false,
-            date: new Date()
+            date: new Date(),
         }
         this.messages.push(message)
         console.log(message)
         return true
     }
 
-    updateMessage(id: string, body: UpdateMessageDto): MessageEntity {
+    updateMessage(id: number, body: UpdateMessageDto): MessageEntity {
         const messageIdx = this.messages.findIndex(m => m.id === +id)
-        
+
         if (messageIdx >= 0) {
             const message = this.messages[messageIdx]
             const newMessage = {
                 ...message,
-                ...body
+                ...body,
             }
             this.messages[messageIdx] = newMessage
             return this.messages[messageIdx]
         }
     }
 
-    destroyMessage(id: string): boolean {
+    destroyMessage(id: number): boolean {
         const messageIdx = this.messages.findIndex(m => m.id === +id)
         if (messageIdx >= 0) {
             this.messages.splice(messageIdx, 1)
@@ -61,7 +63,4 @@ export class MessagesService {
         }
         return false
     }
-
-
-
 }
