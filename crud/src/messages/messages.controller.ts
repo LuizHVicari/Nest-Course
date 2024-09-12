@@ -14,7 +14,7 @@ import {
     Query,
 } from '@nestjs/common'
 import { MessagesService } from './messages.service'
-import { MessageEntity } from './entities/message.entity'
+import { Message } from './entities/message.entity'
 import { CreateMessageDto } from './dto/create-message.dto'
 import { UpdateMessageDto } from './dto/update-message.dto'
 
@@ -25,10 +25,9 @@ export class MessagesController {
     @Get()
     listMessages(
         @Query() pagination: { limit: string; offset: string },
-    ): MessageEntity[] {
+    ): Promise<Message[]> {
         const { limit = '10', offset = '0' } = pagination
         const messages = this.messagesService.findAllMessages()
-        console.debug(messages)
         return messages
     }
 
@@ -40,21 +39,19 @@ export class MessagesController {
 
     @HttpCode(HttpStatus.OK)
     @Get(':id')
-    retrieveMessage(@Param('id') id: number): MessageEntity {
-        const message = this.messagesService.retrieveMessage(id)
-        if (message !== undefined) {
-            return message
-        }
+    async retrieveMessage(@Param('id') id: number): Promise<Message> {
+        const message = await this.messagesService.retrieveMessage(id)
+        if (message) return message
         throw new NotFoundException()
     }
 
     @Patch(':id')
-    partialUpdateMessage(
+    async partialUpdateMessage(
         @Body() body: UpdateMessageDto,
         @Param('id', ParseIntPipe) id: number,
-    ): MessageEntity {
-        const message = this.messagesService.updateMessage(id, body)
-        if (message === undefined) {
+    ): Promise<Message> {
+        const message = await this.messagesService.updateMessage(id, body)
+        if (!message) {
             throw new NotFoundException()
         }
         return message
@@ -62,8 +59,8 @@ export class MessagesController {
 
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
-    destroyMessage(@Param('id', ParseIntPipe) id: number) {
-        const deleted = this.messagesService.destroyMessage(id)
+    async destroyMessage(@Param('id', ParseIntPipe) id: number) {
+        const deleted = await this.messagesService.destroyMessage(id)
         if (!deleted) {
             throw new NotFoundException()
         }

@@ -3,10 +3,12 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { MessagesModule } from 'src/messages/messages.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { PeopleModule } from 'src/people/people.module'
 
 @Module({
     imports: [
-        MessagesModule, 
+        MessagesModule,
+        PeopleModule,
         TypeOrmModule.forRoot({
             type: 'postgres',
             host: 'localhost',
@@ -16,7 +18,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
             database: 'crud',
             autoLoadEntities: true,
             synchronize: true, // should not be used in prod
-        })
+        }),
     ],
     controllers: [AppController],
     providers: [AppService],

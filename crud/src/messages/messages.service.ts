@@ -1,66 +1,64 @@
 import { Injectable } from '@nestjs/common'
-import { MessageEntity } from './entities/message.entity'
+import { Message } from './entities/message.entity'
 import { UpdateMessageDto } from './dto/update-message.dto'
 import { CreateMessageDto } from './dto/create-message.dto'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
 
 @Injectable()
 export class MessagesService {
-    private lastId = 1
-    private messages: MessageEntity[] = [
-        {
-            id: 1,
-            text: 'first message',
-            from: 'Joana',
-            to: 'João',
-            read: false,
-            date: new Date(),
-        },
-    ]
+    constructor(
+        @InjectRepository(Message)
+        private readonly messageRepository: Repository<Message>,
+    ) {}
 
-    findAllMessages(): MessageEntity[] {
-        return this.messages
+    async findAllMessages(): Promise<Message[]> {
+        const messages = await this.messageRepository.find()
+        return messages
     }
 
-    retrieveMessage(id: number): MessageEntity {
-        console.log(id, typeof id)
-        return this.messages.find(item => item.id === id)
+    async retrieveMessage(id: number): Promise<Message> {
+        const message = await this.messageRepository.findOne({
+            where: {
+                id,
+            },
+        })
+        if (message) return message
     }
 
-    createMessage(body: CreateMessageDto): boolean {
-        this.lastId += 1
-        const id = this.lastId
+    async createMessage(body: CreateMessageDto): Promise<Message> {
         const message = {
-            id,
             ...body,
             read: false,
             date: new Date(),
         }
-        this.messages.push(message)
-        console.log(message)
+        const createdMessage = this.messageRepository.create(message)
+        return this.messageRepository.save(createdMessage)
+    }
+
+    async updateMessage(
+        id: number,
+        body: UpdateMessageDto,
+    ): Promise<Message> {
+        const partialUpdateMessageDto = {
+            read: body?.read,
+            text: body.text,
+        }
+        const message = await this.messageRepository.preload({
+            id,
+            ...partialUpdateMessageDto,
+        })
+        if (!message) {
+            return null
+        }
+        return await this.messageRepository.save(message)
+    }
+
+    async destroyMessage(id: number): Promise<boolean> {
+        const message = await this.messageRepository.findOneBy({ id })
+        if (!message) return false
+
+        await this.messageRepository.remove(message)
         return true
-    }
-
-    updateMessage(id: number, body: UpdateMessageDto): MessageEntity {
-        const messageIdx = this.messages.findIndex(m => m.id === +id)
-
-        if (messageIdx >= 0) {
-            const message = this.messages[messageIdx]
-            const newMessage = {
-                ...message,
-                ...body,
-            }
-            this.messages[messageIdx] = newMessage
-            return this.messages[messageIdx]
-        }
-    }
-
-    destroyMessage(id: number): boolean {
-        const messageIdx = this.messages.findIndex(m => m.id === +id)
-        if (messageIdx >= 0) {
-            this.messages.splice(messageIdx, 1)
-            console.debug(this.messages)
-            return true
-        }
-        return false
     }
 }
