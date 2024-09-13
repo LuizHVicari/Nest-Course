@@ -4,7 +4,6 @@ import {
     Column,
     CreateDateColumn,
     Entity,
-    ManyToOne,
     OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
@@ -22,10 +21,10 @@ export class Person {
     @Column({ length: 100 })
     name: string
 
-    @OneToMany(() => Message, (message) => message.from)
+    @OneToMany(() => Message, message => message.from)
     messagesSent: Message
 
-    @OneToMany(() => Message, (message) => message.to)
+    @OneToMany(() => Message, message => message.to)
     messagesReceived: Message
 
     @CreateDateColumn()

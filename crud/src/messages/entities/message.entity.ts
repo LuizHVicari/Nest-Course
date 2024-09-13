@@ -21,10 +21,10 @@ export class Message {
     @Column()
     date: Date
 
-    @ManyToOne(() => Person, {onDelete: 'CASCADE'}) // many messages can be send from one person
+    @ManyToOne(() => Person, { onDelete: 'CASCADE' }) // many messages can be send from one person
     @JoinColumn({ name: 'from' }) // column that holds the id of the person that sent the message
     from: Person
-    @ManyToOne(() => Person, {onDelete: 'CASCADE'}) // one person can receive many messages
+    @ManyToOne(() => Person, { onDelete: 'CASCADE' }) // one person can receive many messages
     @JoinColumn({ name: 'to' }) // column that holds the id of the person that received the message
     to: Person
 

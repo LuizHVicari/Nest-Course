@@ -18,15 +18,15 @@ import { Message } from './entities/message.entity'
 import { CreateMessageDto } from './dto/create-message.dto'
 import { UpdateMessageDto } from './dto/update-message.dto'
 import { PaginationDto } from 'src/commom/dto/pagination.dto'
+import { ApiTags } from '@nestjs/swagger'
 
 @Controller('messages')
+@ApiTags('messages')
 export class MessagesController {
     constructor(private readonly messagesService: MessagesService) {}
 
     @Get()
-    listMessages(
-        @Query() paginationDto: PaginationDto,
-    ): Promise<Message[]> {
+    listMessages(@Query() paginationDto: PaginationDto): Promise<Message[]> {
         const messages = this.messagesService.findAllMessages(paginationDto)
         return messages
     }
