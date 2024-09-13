@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app/app.module'
 import { ValidationPipe } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { ParseIntIdPipe } from './commom/pipes/parse-int-id.pipe'
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule)
@@ -11,7 +12,9 @@ async function bootstrap() {
             forbidNonWhitelisted: true,
             // transform: true, // try to transform the data to the param type on the controller
         }),
+        new ParseIntIdPipe(),
     )
+
     const config = new DocumentBuilder()
         .setTitle('CRUD example')
         .setDescription('An app to practice CRUD operations using NestJs')

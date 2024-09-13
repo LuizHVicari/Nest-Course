@@ -8,10 +8,11 @@ import {
     HttpStatus,
     NotFoundException,
     Param,
-    ParseIntPipe,
     Patch,
     Post,
     Query,
+    UseInterceptors,
+    UsePipes,
 } from '@nestjs/common'
 import { MessagesService } from './messages.service'
 import { Message } from './entities/message.entity'
@@ -19,13 +20,18 @@ import { CreateMessageDto } from './dto/create-message.dto'
 import { UpdateMessageDto } from './dto/update-message.dto'
 import { PaginationDto } from 'src/commom/dto/pagination.dto'
 import { ApiTags } from '@nestjs/swagger'
+import { ParseIntIdPipe } from 'src/commom/pipes/parse-int-id.pipe'
+import { AddHeaderInterceptor } from 'src/commom/interceptors/add-header.interceptor'
+import { TimingConnectionInterceptor } from 'src/commom/interceptors/timing-connection.interceptor'
 
 @Controller('messages')
 @ApiTags('messages')
+@UseInterceptors(AddHeaderInterceptor) // can be used either in the controller, method or globally
 export class MessagesController {
     constructor(private readonly messagesService: MessagesService) {}
 
     @Get()
+    @UseInterceptors(TimingConnectionInterceptor)
     listMessages(@Query() paginationDto: PaginationDto): Promise<Message[]> {
         const messages = this.messagesService.findAllMessages(paginationDto)
         return messages
@@ -38,9 +44,8 @@ export class MessagesController {
         return created
     }
 
-    @HttpCode(HttpStatus.OK)
     @Get(':id')
-    async retrieveMessage(@Param('id') id: number): Promise<Message> {
+    async retrieveMessage(@Param('id',) id: number): Promise<Message> {
         const message = await this.messagesService.retrieveMessage(id)
         if (message) return message
         throw new NotFoundException()
@@ -49,7 +54,7 @@ export class MessagesController {
     @Patch(':id')
     async partialUpdateMessage(
         @Body() body: UpdateMessageDto,
-        @Param('id', ParseIntPipe) id: number,
+        @Param('id',) id: number,
     ): Promise<Message> {
         const message = await this.messagesService.updateMessage(id, body)
         if (!message) {
@@ -60,7 +65,7 @@ export class MessagesController {
 
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
-    async destroyMessage(@Param('id', ParseIntPipe) id: number) {
+    async destroyMessage(@Param('id',) id: number) {
         const deleted = await this.messagesService.destroyMessage(id)
         if (!deleted) {
             throw new NotFoundException()
