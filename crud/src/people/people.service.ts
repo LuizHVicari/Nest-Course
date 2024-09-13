@@ -1,26 +1,72 @@
-import { Injectable } from '@nestjs/common'
+import {
+    BadRequestException,
+    ConflictException,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common'
 import { CreatePersonDto } from './dto/create-person.dto'
 import { UpdatePersonDto } from './dto/update-person.dto'
+import { Person } from './entities/person.entity'
+import { Repository } from 'typeorm'
+import { InjectRepository } from '@nestjs/typeorm'
 
 @Injectable()
 export class PeopleService {
-    create(createPersonDto: CreatePersonDto) {
-        return 'This action adds a new person'
+    constructor(
+        @InjectRepository(Person)
+        private readonly personRepository: Repository<Person>,
+    ) {}
+
+    private async savePerson(person: Person) {
+        try {
+            return await this.personRepository.save(person)
+        } catch (error) {
+            if (error.code === '23505') {
+                throw new ConflictException('Email is already registered.')
+            }
+            throw error
+        }
     }
 
-    findAll() {
-        return `This action returns all people`
+    async create(createPersonDto: CreatePersonDto) {
+        const personData = {
+            name: createPersonDto.name,
+            passwordHash: createPersonDto.password,
+            email: createPersonDto.email,
+        }
+        const person = this.personRepository.create(personData)
+        if (!person) throw new BadRequestException('Could not create person')
+        return await this.savePerson(person)
     }
 
-    findOne(id: number) {
-        return `This action returns a #${id} person`
+    async findAll() {
+        const people = await this.personRepository.find()
+        return people
     }
 
-    update(id: number, updatePersonDto: UpdatePersonDto) {
-        return `This action updates a #${id} person`
+    async findOne(id: number) {
+        const person = await this.personRepository.findOneBy({ id })
+        if (!person) throw new NotFoundException('Could not find person.')
+        return person
     }
 
-    remove(id: number) {
-        return `This action removes a #${id} person`
+    async update(id: number, updatePersonDto: UpdatePersonDto) {
+        const personData = {
+            name: updatePersonDto?.name,
+            passwordHash: updatePersonDto?.password,
+        }
+        const person = await this.personRepository.preload({
+            id,
+            ...personData,
+        })
+        if (!person) {
+            throw new NotFoundException('Person could not be found')
+        }
+        return this.personRepository.save(person)
+    }
+
+    async remove(id: number) {
+        const person = await this.findOne(id)
+        return await this.personRepository.remove(person)
     }
 }

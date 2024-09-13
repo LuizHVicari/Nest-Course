@@ -1,15 +1,21 @@
-import { IsNotEmpty, IsString } from 'class-validator'
+import { IsNotEmpty, IsPositive, IsString } from 'class-validator'
 
 export class CreateMessageDto {
     @IsString()
     @IsNotEmpty()
     readonly text: string
 
-    @IsString()
+    @IsPositive()
     @IsNotEmpty()
-    readonly from: string
+    fromId: number
+    @IsPositive()
+    toId: number
 
-    @IsString()
-    @IsNotEmpty()
-    readonly to: string
+    // @IsString()
+    // @IsNotEmpty()
+    // readonly from: string
+
+    // @IsString()
+    // @IsNotEmpty()
+    // readonly to: string
 }

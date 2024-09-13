@@ -17,6 +17,7 @@ import { MessagesService } from './messages.service'
 import { Message } from './entities/message.entity'
 import { CreateMessageDto } from './dto/create-message.dto'
 import { UpdateMessageDto } from './dto/update-message.dto'
+import { PaginationDto } from 'src/commom/dto/pagination.dto'
 
 @Controller('messages')
 export class MessagesController {
@@ -24,17 +25,17 @@ export class MessagesController {
 
     @Get()
     listMessages(
-        @Query() pagination: { limit: string; offset: string },
+        @Query() paginationDto: PaginationDto,
     ): Promise<Message[]> {
-        const { limit = '10', offset = '0' } = pagination
-        const messages = this.messagesService.findAllMessages()
+        const messages = this.messagesService.findAllMessages(paginationDto)
         return messages
     }
 
     @Post()
-    createMessage(@Body() message: CreateMessageDto) {
-        const created = this.messagesService.createMessage(message)
+    async createMessage(@Body() message: CreateMessageDto) {
+        const created = await this.messagesService.createMessage(message)
         if (!created) throw new BadRequestException()
+        return created
     }
 
     @HttpCode(HttpStatus.OK)

@@ -1,17 +1,32 @@
-import { IsEmail } from "class-validator";
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { IsEmail } from 'class-validator'
+import { Message } from 'src/messages/entities/message.entity'
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    ManyToOne,
+    OneToMany,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
+} from 'typeorm'
 
 @Entity()
 export class Person {
     @PrimaryGeneratedColumn()
     id: number
-    @Column({unique: true})
+    @Column({ unique: true })
     @IsEmail()
     email: string
-    @Column({length: 255})
+    @Column({ length: 255 })
     passwordHash: string
-    @Column({length: 100})
+    @Column({ length: 100 })
     name: string
+
+    @OneToMany(() => Message, (message) => message.from)
+    messagesSent: Message
+
+    @OneToMany(() => Message, (message) => message.to)
+    messagesReceived: Message
 
     @CreateDateColumn()
     createdAt: Date
