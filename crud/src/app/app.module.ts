@@ -21,6 +21,25 @@ import { PeopleModule } from 'src/people/people.module'
         }),
     ],
     controllers: [AppController],
-    providers: [AppService],
+    providers: [
+        AppService,
+        // {
+        //     provide: APP_FILTER,
+        //     useClass: CustomExceptionFilter,
+        // },
+        // {
+        //     provide: APP_GUARD,
+        //     useClass: IsAdminGuard,
+        // },
+    ],
 })
+// export class AppModule implements NestModule {
+//     configure(consumer: MiddlewareConsumer) {
+//         // consumer.apply(SimpleMiddleware).forRoutes('*')
+//         consumer.apply(SimpleMiddleware).forRoutes({
+//             path: '*',
+//             method: RequestMethod.GET,
+//         })
+//     }
+// }
 export class AppModule {}

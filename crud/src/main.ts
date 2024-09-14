@@ -14,6 +14,10 @@ async function bootstrap() {
         }),
         new ParseIntIdPipe(),
     )
+    // this way does not allow dependency injection, another implementation that allows it can be found in src/app/app.module.ts
+    // app.useGlobalGuards(new IsAdminGuard())
+    // app.useGlobalFilters(new CustomExceptionFilter()) // adding a global filter
+    // app.use(new SimpleMiddleware().use) // adding a global middleware
 
     const config = new DocumentBuilder()
         .setTitle('CRUD example')
