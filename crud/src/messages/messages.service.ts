@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { PeopleService } from 'src/people/people.service'
 import { PaginationDto } from 'src/commom/dto/pagination.dto'
+import { ConfigService } from '@nestjs/config'
 
 const returnItems = {
     relations: ['from', 'to'],
@@ -27,7 +28,11 @@ export class MessagesService {
         @InjectRepository(Message)
         private readonly messageRepository: Repository<Message>,
         private readonly peopleService: PeopleService,
-    ) {}
+        // private readonly configService: ConfigService
+    ) {
+        // const dataBaseUsername = this.configService.get<string>('DB_USERNAME')
+        // console.log(dataBaseUsername)
+    }
 
     async findAllMessages({
         limit,

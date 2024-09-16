@@ -9,9 +9,19 @@ import { RegexProtocol } from 'src/commom/regex/regex.protocol'
 import { RemoveSpacesRegex } from 'src/commom/regex/remove-spaces.regex'
 import { OnlyLowercaseLettersRegex } from 'src/commom/regex/only-lowercase.regex'
 import { ONLY_LOWERCASE_LETTERS_REGEX, REMOVE_SPACES_REGEX } from './message.constants'
+import { CustomDynamicModule } from 'src/custom-dynamic/custom-dynamic.module'
+import { ConfigModule } from '@nestjs/config'
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Message]), PeopleModule],
+    imports: [
+        ConfigModule,
+        TypeOrmModule.forFeature([Message]), 
+        PeopleModule,
+        CustomDynamicModule.register({
+            apiKey: 'apikey',
+            apiUrl: 'http://apiurl.com'
+        })
+    ],
     controllers: [MessagesController],
     providers: [
         MessagesService, {
@@ -23,7 +33,7 @@ import { ONLY_LOWERCASE_LETTERS_REGEX, REMOVE_SPACES_REGEX } from './message.con
         }, {
             provide: REMOVE_SPACES_REGEX,
             useClass: RemoveSpacesRegex
-        }
+        },
         // {
         //     provide: RegexProtocol, // would be the interface that the controller (or any other file) will receive
         //     useClass: false /* this could be any boolean condition*/ ?  RemoveSpacesRegex : OnlyLowercaseLettersRegex // the class that will be implemented when calling the interface

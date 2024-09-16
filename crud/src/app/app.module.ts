@@ -4,21 +4,46 @@ import { AppService } from './app.service'
 import { MessagesModule } from 'src/messages/messages.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { PeopleModule } from 'src/people/people.module'
+import { ConfigModule, ConfigService, ConfigType } from '@nestjs/config'
+import * as Joi from '@hapi/joi'
+import { JoiValidationSchema } from 'src/objects/joi_validation_schema'
+import appConfig from './app.config'
+
 
 @Module({
     imports: [
-        MessagesModule,
-        PeopleModule,
-        TypeOrmModule.forRoot({
-            type: 'postgres',
-            host: 'localhost',
-            port: 5432,
-            username: 'postgres',
-            password: 'postgres',
-            database: 'crud',
-            autoLoadEntities: true,
-            synchronize: true, // should not be used in prod
+        ConfigModule.forRoot({
+            validationSchema: Joi.object({JoiValidationSchema}),
+            load: [appConfig]
         }),
+        MessagesModule,
+        // PeopleModule,
+        // TypeOrmModule.forRoot({
+        //     type: process.env.DB_TYPE as 'postgres',
+        //     host: process.env.DB_HOST,
+        //     port: +process.env.DB_PORT,
+        //     username: process.env.DB_USERNAME,
+        //     password: process.env.DB_PASSWORD,
+        //     database: process.env.DB_NAME,
+        //     autoLoadEntities: Boolean(process.env.DB_AUTOLOAD_ENTITIES),
+        //     synchronize: Boolean(process.env.DB_SYNCHRONIZE), // should not be true in prod
+        // }),
+        TypeOrmModule.forRootAsync({
+            imports: [ConfigModule.forFeature(appConfig)],
+            inject: [appConfig.KEY],
+            useFactory: async (appSettings: ConfigType<typeof appConfig>) => {
+                return {
+                    type: appSettings.database.type,
+                    host: appSettings.database.host,
+                    port: appSettings.database.port,
+                    username: appSettings.database.username,
+                    password: appSettings.database.password,
+                    database: appSettings.database.database,
+                    autoLoadEntities: appSettings.database.autoLoadEntities,
+                    synchronize: appSettings.database.synchronize, // should not be true in prod
+                }
+            }
+        })
     ],
     controllers: [AppController],
     providers: [
@@ -35,7 +60,7 @@ import { PeopleModule } from 'src/people/people.module'
 })
 // export class AppModule implements NestModule {
 //     configure(consumer: MiddlewareConsumer) {
-//         // consumer.apply(SimpleMiddleware).forRoutes('*')
+//         consumer.apply(SimpleMiddleware).forRoutes('*')
 //         consumer.apply(SimpleMiddleware).forRoutes({
 //             path: '*',
 //             method: RequestMethod.GET,
