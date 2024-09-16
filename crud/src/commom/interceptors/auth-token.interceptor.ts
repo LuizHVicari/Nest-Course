@@ -24,7 +24,7 @@ export class AuthTokenInterceptor implements NestInterceptor {
             )
         }
 
-        const [bearer, ] = authToken
+        const [bearer] = authToken
 
         if (bearer !== 'Bearer') {
             throw new BadRequestException('Authentication token must be Bearer')

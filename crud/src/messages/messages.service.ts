@@ -6,7 +6,6 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { PeopleService } from 'src/people/people.service'
 import { PaginationDto } from 'src/commom/dto/pagination.dto'
-import { ConfigService } from '@nestjs/config'
 
 const returnItems = {
     relations: ['from', 'to'],

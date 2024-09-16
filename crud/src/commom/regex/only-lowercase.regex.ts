@@ -1,4 +1,4 @@
-import { RegexProtocol } from "./regex.protocol";
+import { RegexProtocol } from './regex.protocol'
 
 export class OnlyLowercaseLettersRegex extends RegexProtocol {
     execute(str: string): string {

@@ -17,7 +17,7 @@ export class Person {
     @IsEmail()
     email: string
     @Column({ length: 255 })
-    passwordHash: string
+    passwordHash: string // will be Hashed
     @Column({ length: 100 })
     name: string
 

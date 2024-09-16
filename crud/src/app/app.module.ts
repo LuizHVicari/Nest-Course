@@ -3,18 +3,16 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { MessagesModule } from 'src/messages/messages.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { PeopleModule } from 'src/people/people.module'
-import { ConfigModule, ConfigService, ConfigType } from '@nestjs/config'
+import { ConfigModule, ConfigType } from '@nestjs/config'
 import * as Joi from '@hapi/joi'
 import { JoiValidationSchema } from 'src/objects/joi_validation_schema'
 import appConfig from './app.config'
 
-
 @Module({
     imports: [
         ConfigModule.forRoot({
-            validationSchema: Joi.object({JoiValidationSchema}),
-            load: [appConfig]
+            validationSchema: Joi.object({ JoiValidationSchema }),
+            load: [appConfig],
         }),
         MessagesModule,
         // PeopleModule,
@@ -42,8 +40,8 @@ import appConfig from './app.config'
                     autoLoadEntities: appSettings.database.autoLoadEntities,
                     synchronize: appSettings.database.synchronize, // should not be true in prod
                 }
-            }
-        })
+            },
+        }),
     ],
     controllers: [AppController],
     providers: [

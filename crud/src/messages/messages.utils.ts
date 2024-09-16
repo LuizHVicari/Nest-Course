@@ -10,6 +10,6 @@ export class MessageUtils {
 @Injectable()
 export class MessageUtilsMock {
     invertString(str: string) {
-        return 'blablabla'
+        return str
     }
 }
