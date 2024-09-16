@@ -6,6 +6,7 @@ import {
     Get,
     HttpCode,
     HttpStatus,
+    Inject,
     NotFoundException,
     Param,
     Patch,
@@ -31,11 +32,23 @@ import { TimingConnectionInterceptor } from 'src/commom/interceptors/timing-conn
 //     AuthTokenInterceptor,
 // ) // can be used either in the controller, method or globally
 export class MessagesController {
-    constructor(private readonly messagesService: MessagesService) {}
+    constructor(
+        private readonly messagesService: MessagesService,
+        // private readonly messageUtils: MessageUtils,
+        // @Inject('SERVER_NAME')
+        // private readonly serverName: string
+        // private readonly regexProtocol: RegexProtocol
+        // @Inject(REMOVE_SPACES_REGEX)
+        // private readonly removeSpacesRegex: RegexProtocol
+    ) {}
 
     @Get()
     @UseInterceptors(TimingConnectionInterceptor)
     listMessages(@Query() paginationDto: PaginationDto): Promise<Message[]> {
+        // console.log(this.messageUtils.invertString('teste'))
+        // console.log(this.serverName)
+        // console.debug(this.regexProtocol.execute('Teste Teste'))
+        // console.debug(this.removeSpacesRegex.execute('teste teste'))
         const messages = this.messagesService.findAllMessages(paginationDto)
         return messages
     }
