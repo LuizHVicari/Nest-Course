@@ -7,25 +7,16 @@ import { ConfigModule, ConfigType } from '@nestjs/config'
 import * as Joi from '@hapi/joi'
 import { JoiValidationSchema } from 'src/objects/joi_validation_schema'
 import appConfig from './app.config'
+import { AuthModule } from 'src/auth/auth.module'
 
 @Module({
     imports: [
+        AuthModule,
         ConfigModule.forRoot({
             validationSchema: Joi.object({ JoiValidationSchema }),
             load: [appConfig],
         }),
         MessagesModule,
-        // PeopleModule,
-        // TypeOrmModule.forRoot({
-        //     type: process.env.DB_TYPE as 'postgres',
-        //     host: process.env.DB_HOST,
-        //     port: +process.env.DB_PORT,
-        //     username: process.env.DB_USERNAME,
-        //     password: process.env.DB_PASSWORD,
-        //     database: process.env.DB_NAME,
-        //     autoLoadEntities: Boolean(process.env.DB_AUTOLOAD_ENTITIES),
-        //     synchronize: Boolean(process.env.DB_SYNCHRONIZE), // should not be true in prod
-        // }),
         TypeOrmModule.forRootAsync({
             imports: [ConfigModule.forFeature(appConfig)],
             inject: [appConfig.KEY],
@@ -44,25 +35,6 @@ import appConfig from './app.config'
         }),
     ],
     controllers: [AppController],
-    providers: [
-        AppService,
-        // {
-        //     provide: APP_FILTER,
-        //     useClass: CustomExceptionFilter,
-        // },
-        // {
-        //     provide: APP_GUARD,
-        //     useClass: IsAdminGuard,
-        // },
-    ],
+    providers: [AppService],
 })
-// export class AppModule implements NestModule {
-//     configure(consumer: MiddlewareConsumer) {
-//         consumer.apply(SimpleMiddleware).forRoutes('*')
-//         consumer.apply(SimpleMiddleware).forRoutes({
-//             path: '*',
-//             method: RequestMethod.GET,
-//         })
-//     }
-// }
 export class AppModule {}
