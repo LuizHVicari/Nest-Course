@@ -1,6 +1,7 @@
 import {
     BadRequestException,
     ConflictException,
+    ForbiddenException,
     Injectable,
     NotFoundException,
 } from '@nestjs/common'
@@ -10,6 +11,7 @@ import { Person } from './entities/person.entity'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { HashingServiceProtocol } from 'src/auth/hashing/hasing.service'
+import { TokenPayloadDto } from 'src/auth/dtos/token-payload.dto'
 
 @Injectable()
 export class PeopleService {
@@ -55,7 +57,10 @@ export class PeopleService {
         return person
     }
 
-    async update(id: number, updatePersonDto: UpdatePersonDto) {
+    async update(
+        id: number, 
+        updatePersonDto: UpdatePersonDto, 
+        tokenPayload: TokenPayloadDto) {
         const personData = {
             name: updatePersonDto?.name,
         }
@@ -73,11 +78,21 @@ export class PeopleService {
         if (!person) {
             throw new NotFoundException('Person could not be found')
         }
+        this.verifyUserToken(tokenPayload, person.id)
+
         return this.personRepository.save(person)
     }
 
-    async remove(id: number) {
+    async remove(id: number, tokenPayload: TokenPayloadDto) {
         const person = await this.findOne(id)
+        this.verifyUserToken(tokenPayload, person.id)
+
         return await this.personRepository.remove(person)
+    }
+
+    verifyUserToken(tokenPayload: TokenPayloadDto, id: number) {
+        if (id !== tokenPayload.sub) {
+            throw new ForbiddenException('The user is not allowed to alter another user data.')
+        }
     }
 }

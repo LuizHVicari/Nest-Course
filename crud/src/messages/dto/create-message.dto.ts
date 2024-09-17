@@ -8,10 +8,6 @@ export class CreateMessageDto {
     readonly text: string
 
     @IsPositive()
-    @IsNotEmpty()
-    @ApiProperty()
-    fromId: number
-    @IsPositive()
     @ApiProperty()
     toId: number
 

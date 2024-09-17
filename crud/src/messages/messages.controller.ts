@@ -11,7 +11,7 @@ import {
     Patch,
     Post,
     Query,
-    UseInterceptors,
+    UseGuards,
 } from '@nestjs/common'
 import { MessagesService } from './messages.service'
 import { Message } from './entities/message.entity'
@@ -19,59 +19,50 @@ import { CreateMessageDto } from './dto/create-message.dto'
 import { UpdateMessageDto } from './dto/update-message.dto'
 import { PaginationDto } from 'src/commom/dto/pagination.dto'
 import { ApiTags } from '@nestjs/swagger'
-import { TimingConnectionInterceptor } from 'src/commom/interceptors/timing-connection.interceptor'
+import { AuthTokenGuard } from 'src/auth/guards/auth-token.guard'
+import { TokenPayloadParam } from 'src/auth/params/token-payload.param'
+import { TokenPayloadDto } from 'src/auth/dtos/token-payload.dto'
 
 @Controller('messages')
 @ApiTags('messages')
-// @UseInterceptors(
-//     AddHeaderInterceptor,
-//     ErrorHandlingInterceptor,
-//     SimpleCacheInterceptor,
-//     ChangeDataInterceptor,
-//     AuthTokenInterceptor,
-// ) // can be used either in the controller, method or globally
 export class MessagesController {
-    constructor(
-        private readonly messagesService: MessagesService,
-        // private readonly messageUtils: MessageUtils,
-        // @Inject('SERVER_NAME')
-        // private readonly serverName: string
-        // private readonly regexProtocol: RegexProtocol
-        // @Inject(REMOVE_SPACES_REGEX)
-        // private readonly removeSpacesRegex: RegexProtocol
-    ) {}
+    constructor(private readonly messagesService: MessagesService) {}
 
     @Get()
-    @UseInterceptors(TimingConnectionInterceptor)
     listMessages(@Query() paginationDto: PaginationDto): Promise<Message[]> {
-        // console.log(this.messageUtils.invertString('teste'))
-        // console.log(this.serverName)
-        // console.debug(this.regexProtocol.execute('Teste Teste'))
-        // console.debug(this.removeSpacesRegex.execute('teste teste'))
         const messages = this.messagesService.findAllMessages(paginationDto)
         return messages
     }
 
     @Post()
-    async createMessage(@Body() message: CreateMessageDto) {
-        const created = await this.messagesService.createMessage(message)
+    @UseGuards(AuthTokenGuard)
+    async createMessage(
+        @Body() message: CreateMessageDto, 
+        @TokenPayloadParam() tokenPayload: TokenPayloadDto
+    ) {
+        const created = await this.messagesService.createMessage(message, tokenPayload)
         if (!created) throw new BadRequestException()
         return created
     }
 
     @Get(':id')
-    async retrieveMessage(@Param('id') id: number): Promise<Message> {
+    async retrieveMessage(
+        @Param('id') id: number,
+        @TokenPayloadParam() tokenPayload: TokenPayloadDto
+    ): Promise<Message> {
         const message = await this.messagesService.retrieveMessage(id)
         if (message) return message
         throw new NotFoundException()
     }
 
     @Patch(':id')
+    @UseGuards(AuthTokenGuard)
     async partialUpdateMessage(
         @Body() body: UpdateMessageDto,
         @Param('id') id: number,
+        @TokenPayloadParam() tokenPayload: TokenPayloadDto
     ): Promise<Message> {
-        const message = await this.messagesService.updateMessage(id, body)
+        const message = await this.messagesService.updateMessage(id, body, tokenPayload)
         if (!message) {
             throw new NotFoundException()
         }
@@ -80,8 +71,12 @@ export class MessagesController {
 
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
-    async destroyMessage(@Param('id') id: number) {
-        const deleted = await this.messagesService.destroyMessage(id)
+    @UseGuards(AuthTokenGuard)
+    async destroyMessage(
+        @Param('id') id: number,
+        @TokenPayloadParam() tokenPayload: TokenPayloadDto
+    ) {
+        const deleted = await this.messagesService.destroyMessage(id, tokenPayload)
         if (!deleted) {
             throw new NotFoundException()
         }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { Message } from './entities/message.entity'
 import { UpdateMessageDto } from './dto/update-message.dto'
 import { CreateMessageDto } from './dto/create-message.dto'
@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { PeopleService } from 'src/people/people.service'
 import { PaginationDto } from 'src/commom/dto/pagination.dto'
+import { TokenPayloadDto } from 'src/auth/dtos/token-payload.dto'
 
 const returnItems = {
     relations: ['from', 'to'],
@@ -28,10 +29,7 @@ export class MessagesService {
         private readonly messageRepository: Repository<Message>,
         private readonly peopleService: PeopleService,
         // private readonly configService: ConfigService
-    ) {
-        // const dataBaseUsername = this.configService.get<string>('DB_USERNAME')
-        // console.log(dataBaseUsername)
-    }
+    ) {}
 
     async findAllMessages({
         limit,
@@ -59,9 +57,9 @@ export class MessagesService {
         throw new NotFoundException('Could not find message')
     }
 
-    async createMessage(body: CreateMessageDto) {
-        const { fromId, toId } = body
-        const from = await this.peopleService.findOne(fromId)
+    async createMessage(body: CreateMessageDto, tokenPayload: TokenPayloadDto) {
+        const { toId } = body
+        const from = await this.peopleService.findOne(tokenPayload.sub)
         const to = await this.peopleService.findOne(toId)
 
         const message = {
@@ -87,18 +85,27 @@ export class MessagesService {
         }
     }
 
-    async updateMessage(id: number, body: UpdateMessageDto) {
+    async updateMessage(id: number, body: UpdateMessageDto, tokenPayload: TokenPayloadDto) {
         const message = await this.retrieveMessage(id)
+        this.verifyUserToken(tokenPayload, message.from.id)
         message.text = body?.text ?? message.text
         message.read = body?.read ?? message.read
         return await this.messageRepository.save(message)
     }
 
-    async destroyMessage(id: number): Promise<boolean> {
-        const message = await this.messageRepository.findOneBy({ id })
+    async destroyMessage(id: number, tokenPayload: TokenPayloadDto): Promise<boolean> {
+        const message = await this.retrieveMessage(id)
+        console.log(message)
+        this.verifyUserToken(tokenPayload, message.from.id)
         if (!message) return false
 
         await this.messageRepository.remove(message)
         return true
+    }
+
+    verifyUserToken(tokenPayload: TokenPayloadDto, fromId: number) {
+        if (tokenPayload.sub !== fromId) {
+            throw new ForbiddenException('This message was sent from another user')
+        }
     }
 }

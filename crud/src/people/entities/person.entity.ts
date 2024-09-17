@@ -20,6 +20,8 @@ export class Person {
     passwordHash: string // will be Hashed
     @Column({ length: 100 })
     name: string
+    @Column({ default: true })
+    active: boolean
 
     @OneToMany(() => Message, message => message.from)
     messagesSent: Message

@@ -18,8 +18,6 @@ export class SimpleMiddleware implements NestMiddleware {
         }
         next()
 
-        res.on('close', () => {
-            console.log('Connections finnished')
-        })
+        res.on('close', () => {})
     }
 }
