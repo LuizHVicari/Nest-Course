@@ -11,7 +11,6 @@ import { RefreshTokenDto } from './dtos/refresh-token.dto'
 
 @Injectable()
 export class AuthService {
-    
     constructor(
         @InjectRepository(Person)
         private readonly personRepository: Repository<Person>,
@@ -24,7 +23,7 @@ export class AuthService {
     async login(loginDto: LoginDto) {
         const person = await this.personRepository.findOneBy({
             email: loginDto.email,
-            active: true
+            active: true,
         })
 
         let passwordHashValid = false
@@ -32,7 +31,7 @@ export class AuthService {
         if (person) {
             passwordHashValid = await this.hashingService.compare(
                 loginDto.password,
-                person.passwordHash
+                person.passwordHash,
             )
         }
 
@@ -43,12 +42,12 @@ export class AuthService {
         const accessTokenPromise = this.getAcessToken(person)
         const refreshTokenPromise = this.signTokenAsync(
             person.id,
-            this.jwtSettings.jwtRefreshTtl
+            this.jwtSettings.jwtRefreshTtl,
         )
 
         const [accessToken, refreshToken] = await Promise.all([
-            accessTokenPromise, 
-            refreshTokenPromise
+            accessTokenPromise,
+            refreshTokenPromise,
         ])
 
         return { accessToken, refreshToken }
@@ -58,47 +57,46 @@ export class AuthService {
         try {
             const { sub } = await this.jwtService.verifyAsync(
                 refreshTokenDto.refreshToken,
-                this.jwtSettings
+                this.jwtSettings,
             )
             const user = await this.personRepository.findOneBy({
                 id: sub,
-                active: true
+                active: true,
             })
             if (!user) {
                 throw new Error('User is either not authorized or inactive')
             }
 
             return { accessToken: await this.getAcessToken(user) }
-
         } catch (error) {
-            throw new UnauthorizedException('Refresh token is invalid')
+            throw new UnauthorizedException('Refresh token is invalid' + error)
         }
-        
     }
 
     private async signTokenAsync<T>(
-        sub: number, 
-        payload?: T,  
-        expiresIn: number = 3600
+        sub: number,
+        payload?: T,
+        expiresIn: number = 3600,
     ) {
-        return await this.jwtService.signAsync({
-            sub: sub,
-            ...payload
-        }, {
-            audience: this.jwtSettings.audience,
-            issuer: this.jwtSettings.issuer,
-            secret: this.jwtSettings.secret,
-            expiresIn,
-        })
+        return await this.jwtService.signAsync(
+            {
+                sub: sub,
+                ...payload,
+            },
+            {
+                audience: this.jwtSettings.audience,
+                issuer: this.jwtSettings.issuer,
+                secret: this.jwtSettings.secret,
+                expiresIn,
+            },
+        )
     }
 
     private async getAcessToken(person: Person) {
         return await this.signTokenAsync<Partial<Person>>(
             person.id,
             { email: person.email },
-            this.jwtSettings.jwtTtl
+            this.jwtSettings.jwtTtl,
         )
     }
-
-   
 }

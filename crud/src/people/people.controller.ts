@@ -42,14 +42,21 @@ export class PeopleController {
 
     @Patch(':id')
     @UseGuards(AuthTokenGuard)
-    update(@Param('id') id: string, @Body() updatePersonDto: UpdatePersonDto, @TokenPayloadParam() tokenPayload: TokenPayloadDto) {
+    update(
+        @Param('id') id: string,
+        @Body() updatePersonDto: UpdatePersonDto,
+        @TokenPayloadParam() tokenPayload: TokenPayloadDto,
+    ) {
         return this.peopleService.update(+id, updatePersonDto, tokenPayload)
     }
 
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
     @UseGuards(AuthTokenGuard)
-    remove(@Param('id') id: string,@TokenPayloadParam() tokenPayload: TokenPayloadDto) {
+    remove(
+        @Param('id') id: string,
+        @TokenPayloadParam() tokenPayload: TokenPayloadDto,
+    ) {
         return this.peopleService.remove(+id, tokenPayload)
     }
 }

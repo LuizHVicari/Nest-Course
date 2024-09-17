@@ -58,9 +58,10 @@ export class PeopleService {
     }
 
     async update(
-        id: number, 
-        updatePersonDto: UpdatePersonDto, 
-        tokenPayload: TokenPayloadDto) {
+        id: number,
+        updatePersonDto: UpdatePersonDto,
+        tokenPayload: TokenPayloadDto,
+    ) {
         const personData = {
             name: updatePersonDto?.name,
         }
@@ -92,7 +93,9 @@ export class PeopleService {
 
     verifyUserToken(tokenPayload: TokenPayloadDto, id: number) {
         if (id !== tokenPayload.sub) {
-            throw new ForbiddenException('The user is not allowed to alter another user data.')
+            throw new ForbiddenException(
+                'The user is not allowed to alter another user data.',
+            )
         }
     }
 }

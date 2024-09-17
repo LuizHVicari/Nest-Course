@@ -12,6 +12,9 @@ import { MessagesModule } from 'src/messages/messages.module'
     ],
     controllers: [PeopleController],
     providers: [PeopleService],
-    exports: [PeopleService],
+    exports: [
+        PeopleService,
+        TypeOrmModule.forFeature([Person])
+    ],
 })
 export class PeopleModule {}

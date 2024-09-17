@@ -10,6 +10,9 @@ import { JwtService } from '@nestjs/jwt'
 import { Request } from 'express'
 import jwtConfig from '../config/jwt.config'
 import { REQUEST_TOKEN_PAYLOAD_KEY } from '../auth.constants'
+import { Repository } from 'typeorm'
+import { Person } from 'src/people/entities/person.entity'
+import { InjectRepository } from '@nestjs/typeorm'
 
 @Injectable()
 export class AuthTokenGuard implements CanActivate {
@@ -17,6 +20,8 @@ export class AuthTokenGuard implements CanActivate {
         private readonly jwtService: JwtService,
         @Inject(jwtConfig.KEY)
         private readonly jwtSettings: ConfigType<typeof jwtConfig>,
+        @InjectRepository(Person)
+        private readonly personRepository: Repository<Person>
     ) {}
 
     async canActivate(context: ExecutionContext) {
@@ -32,9 +37,17 @@ export class AuthTokenGuard implements CanActivate {
                 token,
                 this.jwtSettings,
             )
+            const user = await this.personRepository.findOneBy({id: payload.sub, active: true})
+            
+            if (!user) {
+                throw new UnauthorizedException('Person not found')
+            }
+            
+            payload['user'] = user
             request[REQUEST_TOKEN_PAYLOAD_KEY] = payload
+
         } catch (error) {
-            throw new UnauthorizedException('Falha ao logar' + error)
+            throw new UnauthorizedException('Failed to Log in' + error)
         }
 
         return true

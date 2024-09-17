@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
+import {
+    ForbiddenException,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common'
 import { Message } from './entities/message.entity'
 import { UpdateMessageDto } from './dto/update-message.dto'
 import { CreateMessageDto } from './dto/create-message.dto'
@@ -85,7 +89,11 @@ export class MessagesService {
         }
     }
 
-    async updateMessage(id: number, body: UpdateMessageDto, tokenPayload: TokenPayloadDto) {
+    async updateMessage(
+        id: number,
+        body: UpdateMessageDto,
+        tokenPayload: TokenPayloadDto,
+    ) {
         const message = await this.retrieveMessage(id)
         this.verifyUserToken(tokenPayload, message.from.id)
         message.text = body?.text ?? message.text
@@ -93,7 +101,10 @@ export class MessagesService {
         return await this.messageRepository.save(message)
     }
 
-    async destroyMessage(id: number, tokenPayload: TokenPayloadDto): Promise<boolean> {
+    async destroyMessage(
+        id: number,
+        tokenPayload: TokenPayloadDto,
+    ): Promise<boolean> {
         const message = await this.retrieveMessage(id)
         console.log(message)
         this.verifyUserToken(tokenPayload, message.from.id)
@@ -105,7 +116,9 @@ export class MessagesService {
 
     verifyUserToken(tokenPayload: TokenPayloadDto, fromId: number) {
         if (tokenPayload.sub !== fromId) {
-            throw new ForbiddenException('This message was sent from another user')
+            throw new ForbiddenException(
+                'This message was sent from another user',
+            )
         }
     }
 }
