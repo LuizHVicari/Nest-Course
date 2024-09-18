@@ -8,9 +8,15 @@ import * as Joi from '@hapi/joi'
 import { JoiValidationSchema } from 'src/objects/joi_validation_schema'
 import appConfig from './app.config'
 import { AuthModule } from 'src/auth/auth.module'
+import { ServeStaticModule } from '@nestjs/serve-static'
+import * as path from 'path'
 
 @Module({
     imports: [
+        ServeStaticModule.forRoot({
+            rootPath: path.resolve(__dirname, '..', '..', 'pictures'),
+            serveRoot: '/pictures'
+        }),
         AuthModule,
         ConfigModule.forRoot({
             validationSchema: Joi.object({ JoiValidationSchema }),

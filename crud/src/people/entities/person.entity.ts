@@ -23,8 +23,10 @@ export class Person {
     name: string
     @Column({ default: true })
     active: boolean
-    @Column({type: 'simple-array', default: []})
-    policies: RoutePolicies[]
+    // @Column({ type: 'simple-array', default: [] })
+    // policies: RoutePolicies[]
+    @Column({default: ''})
+    picture: string
 
     @OneToMany(() => Message, message => message.from)
     messagesSent: Message

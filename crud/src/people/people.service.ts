@@ -12,6 +12,9 @@ import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { HashingServiceProtocol } from 'src/auth/hashing/hasing.service'
 import { TokenPayloadDto } from 'src/auth/dtos/token-payload.dto'
+import { randomUUID } from 'crypto'
+import * as path from 'path'
+import * as fs from 'fs/promises'
 
 @Injectable()
 export class PeopleService {
@@ -97,5 +100,26 @@ export class PeopleService {
                 'The user is not allowed to alter another user data.',
             )
         }
+    }
+
+    async uploadPicture(file: Express.Multer.File, tokenPayload: TokenPayloadDto) {
+        if (file.size < 1024) {
+            throw new BadRequestException('File size too small')
+        }
+        const person = await this.findOne(tokenPayload.sub)
+        const mimeType = file.mimetype
+        const fileExtension = path.extname(file.originalname)
+            .toLowerCase()
+            .substring(1)
+        console.log(fileExtension, mimeType)
+        const fileName = `${tokenPayload.sub}@${randomUUID()}.${fileExtension}`
+        const fileFullPath = path.resolve(process.cwd(), 'pictures', fileName)
+
+        await fs.writeFile(fileFullPath, file.buffer)
+
+        person.picture = fileName
+        await this.personRepository.save(person)
+
+        return person
     }
 }

@@ -21,7 +21,7 @@ export class AuthTokenGuard implements CanActivate {
         @Inject(jwtConfig.KEY)
         private readonly jwtSettings: ConfigType<typeof jwtConfig>,
         @InjectRepository(Person)
-        private readonly personRepository: Repository<Person>
+        private readonly personRepository: Repository<Person>,
     ) {}
 
     async canActivate(context: ExecutionContext) {
@@ -37,15 +37,17 @@ export class AuthTokenGuard implements CanActivate {
                 token,
                 this.jwtSettings,
             )
-            const user = await this.personRepository.findOneBy({id: payload.sub, active: true})
-            
+            const user = await this.personRepository.findOneBy({
+                id: payload.sub,
+                active: true,
+            })
+
             if (!user) {
                 throw new UnauthorizedException('Person not found')
             }
-            
+
             payload['user'] = user
             request[REQUEST_TOKEN_PAYLOAD_KEY] = payload
-
         } catch (error) {
             throw new UnauthorizedException('Failed to Log in' + error)
         }

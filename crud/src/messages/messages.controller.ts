@@ -11,7 +11,6 @@ import {
     Patch,
     Post,
     Query,
-    SetMetadata,
     UseGuards,
 } from '@nestjs/common'
 import { MessagesService } from './messages.service'
@@ -23,15 +22,13 @@ import { ApiTags } from '@nestjs/swagger'
 import { AuthTokenGuard } from 'src/auth/guards/auth-token.guard'
 import { TokenPayloadParam } from 'src/auth/params/token-payload.param'
 import { TokenPayloadDto } from 'src/auth/dtos/token-payload.dto'
-import { RoutePolicyGuard } from 'src/auth/guards/route-policy.guard'
-import { ROUTE_POLICY_KEY } from 'src/auth/auth.constants'
 import { SetRoutePolicy } from 'src/commom/decorators/set-route-policy.decorator'
 import { RoutePolicies } from 'src/commom/enums/route-policies.enum'
 
 @Controller('messages')
 @ApiTags('messages')
 // @UseGuards(AuthTokenGuard)
-@UseGuards(AuthTokenGuard, RoutePolicyGuard)
+// @UseGuards(AuthTokenGuard)
 export class MessagesController {
     constructor(private readonly messagesService: MessagesService) {}
 
