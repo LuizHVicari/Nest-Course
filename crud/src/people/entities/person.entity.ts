@@ -1,5 +1,4 @@
 import { IsEmail } from 'class-validator'
-import { RoutePolicies } from 'src/commom/enums/route-policies.enum'
 import { Message } from 'src/messages/entities/message.entity'
 import {
     Column,
@@ -25,7 +24,7 @@ export class Person {
     active: boolean
     // @Column({ type: 'simple-array', default: [] })
     // policies: RoutePolicies[]
-    @Column({default: ''})
+    @Column({ default: '' })
     picture: string
 
     @OneToMany(() => Message, message => message.from)

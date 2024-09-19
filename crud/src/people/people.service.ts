@@ -39,6 +39,7 @@ export class PeopleService {
         const passwordHash = await this.hashingService.hash(
             createPersonDto.password,
         )
+
         const personData = {
             name: createPersonDto.name,
             passwordHash,
@@ -102,13 +103,17 @@ export class PeopleService {
         }
     }
 
-    async uploadPicture(file: Express.Multer.File, tokenPayload: TokenPayloadDto) {
+    async uploadPicture(
+        file: Express.Multer.File,
+        tokenPayload: TokenPayloadDto,
+    ) {
         if (file.size < 1024) {
             throw new BadRequestException('File size too small')
         }
         const person = await this.findOne(tokenPayload.sub)
         const mimeType = file.mimetype
-        const fileExtension = path.extname(file.originalname)
+        const fileExtension = path
+            .extname(file.originalname)
             .toLowerCase()
             .substring(1)
         console.log(fileExtension, mimeType)

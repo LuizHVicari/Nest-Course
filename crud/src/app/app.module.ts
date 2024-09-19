@@ -15,7 +15,7 @@ import * as path from 'path'
     imports: [
         ServeStaticModule.forRoot({
             rootPath: path.resolve(__dirname, '..', '..', 'pictures'),
-            serveRoot: '/pictures'
+            serveRoot: '/pictures',
         }),
         AuthModule,
         ConfigModule.forRoot({
